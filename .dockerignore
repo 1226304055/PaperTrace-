@@ -1,0 +1,14 @@
+.git
+.env
+.venv
+__pycache__
+.pytest_cache
+data
+chroma_db
+images
+pdfs
+eval/questions.local.json
+eval/reports
+tests/.chroma-test
+*.pdf
+*.docx
