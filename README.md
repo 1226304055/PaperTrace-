@@ -99,55 +99,6 @@ python test_api.py index ./pdfs
 
 完整接口结构可在启动后访问 <http://localhost:8000/docs>。
 
-### 问答示例
-
-```bash
-curl -X POST http://localhost:8000/api/ask \
-  -H "Content-Type: application/json" \
-  -d '{"message":"比较这些论文使用的数据集与指标","k":5}'
-```
-
-响应中的 `citations` 字段包含来源论文、页码、片段类型、相关度和可用的图表地址。
-
-## 测试与评测
-
-当前本地基线使用 1 篇 24 页论文构建 18 个事实、方法和结果问题：来源命中率 100%、页码命中率 83.3%、引用覆盖率 100%、综合任务成功率 66.7%，P50/P95 延迟为 2.97/8.17 秒，平均每题约 2,944 Tokens。该结果仅代表单篇论文上的初始基线，完整定义与限制见 [`eval/README.md`](eval/README.md)。
-
-不依赖外部模型的核心测试：
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-可以从本地 PDF 自动构建带来源、页码和关键词标签的问题集，再运行评测：
-
-```bash
-python scripts/build_eval_set.py --count 20 --output eval/questions.local.json
-python scripts/evaluate.py eval/questions.local.json --output eval/reports/final.local.json
-```
-
-评测结果不会预置虚构数据。私有问题集和逐题报告默认不会提交到 Git。
-
-## Docker
-
-推荐使用一条命令启动：
-
-```bash
-docker compose up --build
-```
-
-也可以单独构建镜像：
-
-```bash
-docker build -t papertrace .
-docker run --rm -p 8000:8000 \
-  --env-file .env \
-  -v "${PWD}/pdfs:/app/pdfs" \
-  -v "${PWD}/chroma_db:/app/chroma_db" \
-  -v "${PWD}/images:/app/images" \
-  papertrace
-```
-
 ## 项目结构
 
 ```text
@@ -170,5 +121,3 @@ papertrace/
 - 部分矢量图由 PDF 绘图指令组成，无法通过嵌入图片接口直接提取。
 - 后台任务运行在单个 Web 进程中，适合个人或小型实验室部署；多实例部署需要外部任务队列。
 - 当前混合检索使用轻量词项覆盖重排，尚未接入专门的 Cross-Encoder reranker。
-
-更多设计说明见 [docs/design.md](docs/design.md)。
